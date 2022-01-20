@@ -70,6 +70,15 @@ resource "azurerm_automation_account" "aa" {
   sku_name            = "Basic"
 }
 
+resource "azurerm_automation_module" "MicrosoftTeams" {
+  name                    = "MicrosoftTeams"
+  resource_group_name     = azurerm_resource_group.rg.name
+  automation_account_name = azurerm_automation_account.aa.name
+  module_link {
+    uri = "https://www.powershellgallery.com/api/v2/package/MicrosoftTeams"
+  }
+}
+
 resource "azurerm_automation_schedule" "twohours" {
   name                    = "EveryTwoHours"
   resource_group_name     = azurerm_resource_group.rg.name
