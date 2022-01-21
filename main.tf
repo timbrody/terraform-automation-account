@@ -7,28 +7,28 @@ terraform {
     }
   }
 
+  backend "azurerm" {
+    resource_group_name  = "rg-tfstate"
+    storage_account_name = "stuosjftdbtfstate"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
+
+
   required_version = ">= 1.1.0"
 }
 
-variable "resource_group_name" {
-  type        = string
-  default     = "rg-aa-uos-jf-servicenow"
-  description = "Resource group name"
+locals {
+  environment = terraform.workspace
+  service     = "telephony"
+  servicenow_instances = {
+    "dev"  = "sotondev"
+    "pprd" = "sotonpprd"
+    "prod" = "sotonproduction"
+  }
+  servicenow_instance_name = lookup(local.servicenow_instances, local.environment)
 }
 
-
-variable "automation_account_name" {
-  type        = string
-  default     = "aa-uos-jf-servicenow"
-  description = "Automation account name"
-}
-
-variable "servicenow_instance_name" {
-  type        = string
-  default     = ""
-  description = "ServiceNow instance name"
-  sensitive   = true
-}
 variable "servicenow_user_name" {
   type        = string
   default     = ""
@@ -59,12 +59,12 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
+  name     = "rg-${local.environment}-${local.service}"
   location = "uksouth"
 }
 
 resource "azurerm_automation_account" "aa" {
-  name                = var.automation_account_name
+  name                = "aa-${local.environment}-${local.service}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   sku_name            = "Basic"
@@ -122,7 +122,7 @@ resource "azurerm_automation_variable_string" "servicenow_instance" {
   name                    = "ServiceNowInstanceName"
   resource_group_name     = azurerm_resource_group.rg.name
   automation_account_name = azurerm_automation_account.aa.name
-  value                   = var.servicenow_instance_name
+  value                   = local.servicenow_instance_name
 }
 
 
