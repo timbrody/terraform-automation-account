@@ -89,6 +89,16 @@ resource "azurerm_automation_schedule" "twohours" {
   description             = "Run every two hours"
 }
 
+resource "azurerm_automation_schedule" "sixhours" {
+  name                    = "EverySixHours"
+  resource_group_name     = azurerm_resource_group.rg.name
+  automation_account_name = azurerm_automation_account.aa.name
+  frequency               = "Hour"
+  interval                = 6
+  timezone                = "Etc/UTC"
+  description             = "Run every six hours"
+}
+
 
 resource "azurerm_automation_credential" "servicenow" {
   name                    = "ServiceNow"
@@ -135,7 +145,7 @@ resource "azurerm_automation_runbook" "TeamsTelephonyDataToServiceNow" {
 resource "azurerm_automation_job_schedule" "TeamsTelephonyDataToServiceNow_sched" {
   resource_group_name     = azurerm_resource_group.rg.name
   automation_account_name = azurerm_automation_account.aa.name
-  schedule_name           = azurerm_automation_schedule.twohours.name
+  schedule_name           = azurerm_automation_schedule.sixhours.name
   runbook_name            = azurerm_automation_runbook.TeamsTelephonyDataToServiceNow.name
-  depends_on              = [azurerm_automation_schedule.twohours]
+  depends_on              = [azurerm_automation_schedule.sixhours]
 }
