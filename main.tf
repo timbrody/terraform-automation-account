@@ -27,6 +27,9 @@ locals {
     "prod" = "sotonproduction"
   }
   servicenow_instance_name = lookup(local.servicenow_instances, local.environment)
+  company                  = "uos"
+  location                 = "uksouth"
+  resource_name            = "${local.company}-${local.location}-${local.service}-${local.environment}"
 }
 
 variable "servicenow_user_name" {
@@ -59,12 +62,15 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-${local.environment}-${local.service}"
-  location = "uksouth"
+  name     = "rg-${local.resource_name}"
+  location = local.location
+  tags = {
+    "CMDB" = "CMDB804337"
+  }
 }
 
 resource "azurerm_automation_account" "aa" {
-  name                = "aa-${local.environment}-${local.service}"
+  name                = "aa-${local.resource_name}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   sku_name            = "Basic"
